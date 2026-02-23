@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Pemetaan Mapel TKA SNBP 2025</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#f3f4f6}
+
+/* LOGIN */
+.login{min-height:100vh;display:flex;align-items:center;justify-content:center}
+.login-box{
+  background:#fff;
+  padding:30px;
+  width:100%;
+  max-width:380px;
+  border-radius:12px;
+  box-shadow:0 10px 25px rgba(0,0,0,.1);
+  text-align:center
+}
+.login-box img{width:120px}
+.login-box input,button{
+  width:100%;
+  padding:12px;
+  margin-top:12px;
+  border-radius:8px;
+  border:1px solid #ccc
+}
+.login-box button{
+  background:#1e40af;
+  color:#fff;
+  border:none;
+  cursor:pointer
+}
+.error{color:#dc2626;margin-top:10px;display:none}
+
+/* APP */
+.app{display:none}
+.container{max-width:1100px;margin:auto;background:#fff;padding:25px}
+header{text-align:center}
+header img{width:130px}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:15px;
+  margin-top:20px
+}
+
+select,button{
+  width:100%;
+  padding:12px;
+  border-radius:8px;
+  border:1px solid #ccc
+}
+
+button.primary{background:#1e40af;color:#fff;border:none}
+button.print{background:#065f46;color:#fff;border:none}
+
+.hasil{margin-top:25px}
+.box{
+  padding:15px;
+  border-radius:10px;
+  margin-bottom:15px;
+  background:#fee2e2
+}
+.warn{color:#b91c1c;font-weight:bold}
+
+@page{size:A4;margin:20mm}
+@media print{
+  .login,button{display:none}
+  body{background:#fff}
+}
+</style>
+</head>
+
+<body>
+
+<!-- ================= LOGIN ================= -->
+<div class="login" id="loginBox">
+  <div class="login-box">
+    <img src="https://tosbmptn15ub.weebly.com/uploads/4/6/1/4/46146887/929305838.png">
+    <h3>Akses Sistem Rekomendasi Mapel TKA Neutron Murangan</h3>
+    <input type="password" id="kodeAkses" placeholder="Masukkan kode akses">
+    <button onclick="cekAkses()">Masuk</button>
+    <div class="error" id="pesanError">❌ Kode salah</div>
+  </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div class="app" id="appBox">
+  <div class="container">
+    <header>
+      <img src="https://tosbmptn15ub.weebly.com/uploads/4/6/1/4/46146887/929305838.png">
+      <h1>Pemetaan Mapel TKA Neutron Murangan</h1>
+      <p>Dasar: SK Mapel Pendukung Program Studi SNBP 2025</p>
+    </header>
+
+    <div class="grid">
+      <div>
+        <label>Jurusan SMA</label>
+        <select id="jalur">
+          <option value="">-- Pilih --</option>
+          <option>IPA</option>
+          <option>IPS</option>
+          <option>Bahasa</option>
+        </select>
+      </div>
+      <div>
+        <label>Prodi Pilihan 1</label>
+        <select id="p1"></select>
+      </div>
+      <div>
+        <label>Prodi Pilihan 2</label>
+        <select id="p2"></select>
+      </div>
+    </div>
+
+    <div class="grid">
+      <button class="primary" onclick="proses()">Tampilkan Mapel Rekomendasi</button>
+      <button class="print" onclick="window.print()">Cetak PDF A4</button>
+    </div>
+
+    <div class="hasil" id="hasil"></div>
+  </div>
+</div>
+
+<script>
+/* ========== LOGIN FIX (AMAN) ========== */
+function cekAkses(){
+  const kode = document.getElementById("kodeAkses").value;
+  const loginBox = document.getElementById("loginBox");
+  const appBox = document.getElementById("appBox");
+  const errorBox = document.getElementById("pesanError");
+
+  if(kode === "neutronmurangan"){
+    loginBox.style.display = "none";
+    appBox.style.display = "block";
+    errorBox.style.display = "none";
+  }else{
+    errorBox.style.display = "block";
+  }
+}
+
+/* ================= DATA PRODI (ISI TIDAK DIUBAH) ================= */
+const prodi={
+"Administrasi Bisnis":{ipa:["Matematika","Ekonomi"],ips:["Ekonomi"],bahasa:["Matematika","Ekonomi"]},
+"Akuntansi":{ipa:["Matematika","Ekonomi"],ips:["Ekonomi"],bahasa:["Ekonomi"]},
+"Astronomi":{ipa:["Fisika","Matematika"],ips:[],bahasa:[]},
+"Arsitektur":{ipa:["Matematika","Fisika"],ips:["Matematika"],bahasa:["Matematika"]},
+"Biologi":{ipa:["Biologi"],ips:["Biologi"],bahasa:["Biologi"]},
+"Biofisika":{ipa:["Fisika"],ips:[],bahasa:[]},
+"Bisnis":{ipa:["Ekonomi"],ips:["Ekonomi"],bahasa:["Ekonomi"]},
+"Bioteknologi":{ipa:["Biologi","Matematika"],ips:[],bahasa:[]},
+"Desain":{ipa:["Seni Budaya"],ips:["Seni Budaya"],bahasa:["Seni Budaya"]},
+"Ekonomi":{ipa:["Ekonomi","Matematika"],ips:["Ekonomi"],bahasa:["Ekonomi"]},
+"Farmasi":{ipa:["Biologi","Kimia"],ips:["Biologi","Kimia"],bahasa:["Biologi","Kimia"]},
+"Filsafat":{ipa:["Sosiologi"],ips:["Sosiologi"],bahasa:["Sosiologi"]},
+"Fisika":{ipa:["Fisika"],ips:[],bahasa:[]},
+"Geografi":{ipa:["Geografi"],ips:["Geografi"],bahasa:["Geografi"]},
+"Gizi":{ipa:["Biologi","Kimia"],ips:["Biologi","Kimia"],bahasa:["Biologi","Kimia"]},
+"Hukum":{ipa:["PPKn"],ips:["PPKn","Sosiologi"],bahasa:["PPKn"]},
+"Ilmu Komputer":{ipa:["Matematika"],ips:["Matematika"],bahasa:["Matematika"]},
+"Ilmu atau Sains Komunikasi":{ipa:["Bahasa Indonesia","Sosiologi"],ips:["Sosiologi"],bahasa:["Antropologi","Sosiologi"]},
+"Ilmu atau Sains Lingkungan":{ipa:["Biologi"],ips:["Biologi"],bahasa:["Biologi"]},
+"Ilmu Perikanan":{ipa:["Biologi"],ips:["Biologi"],bahasa:["Biologi"]},
+"Ilmu Pertanian":{ipa:["Biologi"],ips:["Biologi"],bahasa:["Biologi"]},
+"Ilmu Sosial":{ipa:["Sosiologi"],ips:["Sosiologi"],bahasa:["Sosiologi"]},
+"Informatika Kesehatan":{ipa:["Biologi","Matematika"],ips:[],bahasa:[]},
+"Kebidanan":{ipa:["Biologi"],ips:["Biologi"],bahasa:["Biologi"]},
+"Kedokteran":{ipa:["Biologi","Kimia"],ips:["Biologi","Kimia"],bahasa:["Biologi","Kimia"]},
+"Kedokteran Gigi":{ipa:["Biologi","Kimia"],ips:["Biologi","Kimia"],bahasa:["Biologi","Kimia"]},
+"Kehutanan":{ipa:["Biologi"],ips:["Biologi"],bahasa:["Biologi"]},
+"Kesehatan":{ipa:["Biologi"],ips:["Biologi"],bahasa:["Biologi"]},
+"Kesehatan Masyarakat":{ipa:["Biologi"],ips:["Biologi"],bahasa:["Biologi"]},
+"Keolahragaan":{ipa:["PJOK"],ips:["PJOK"],bahasa:["PJOK"]},
+"Keperawatan":{ipa:["Biologi"],ips:["Biologi"],bahasa:["Biologi"]},
+"Kimia":{ipa:["Kimia"],ips:["Kimia"],bahasa:["Kimia"]},
+"Konservasi Biologi":{ipa:["Biologi"],ips:["Biologi"],bahasa:["Biologi"]},
+"Logika":{ipa:["Matematika"],ips:["Matematika"],bahasa:["Matematika"]},
+"Logistik":{ipa:["Ekonomi"],ips:["Ekonomi"],bahasa:["Ekonomi"]},
+"Manajemen":{ipa:["Ekonomi"],ips:["Ekonomi"],bahasa:["Ekonomi"]},
+"Matematika":{ipa:["Matematika"],ips:["Matematika"],bahasa:["Matematika"]},
+"Militer":{ipa:["PPKn"],ips:["PPKn"],bahasa:["PPKn"]},
+"Pariwisata":{ipa:["Bahasa Inggris"],ips:["Bahasa Inggris"],bahasa:["Bahasa Inggris"]},
+"Pendidikan":{ipa:["Mapel Relevan"],ips:["Mapel Relevan"],bahasa:["Mapel Relevan"]},
+"Perencanaan Wilayah":{ipa:["Matematika"],ips:["Matematika"],bahasa:["Matematika"]},
+"Peternakan":{ipa:["Biologi"],ips:["Biologi"],bahasa:["Biologi"]},
+"Psikologi":{ipa:["Sosiologi"],ips:["Sosiologi"],bahasa:["Sosiologi"]},
+"Sains Data":{ipa:["Matematika"],ips:["Matematika"],bahasa:["Matematika"]},
+"Sains Informasi":{ipa:["Matematika"],ips:["Matematika"],bahasa:["Matematika"]},
+"Seni":{ipa:["Seni Budaya"],ips:["Seni Budaya"],bahasa:["Seni Budaya"]},
+"Sejarah":{ipa:["Sejarah Indonesia"],ips:["Sejarah Indonesia"],bahasa:["Sejarah Indonesia"]},
+"Studi Humanitas":{ipa:["Sosiologi"],ips:["Sosiologi"],bahasa:["Sosiologi"]},
+"Susastra":{ipa:["Bahasa Indonesia"],ips:["Bahasa Indonesia"],bahasa:["Bahasa Indonesia"]},
+"Teknik atau Rekayasa":{ipa:["Fisika","Kimia","Matematika"],ips:["Fisika","Kimia","Matematika"],bahasa:["Fisika","Kimia","Matematika"]},
+"Teknologi Pangan":{ipa:["Biologi","Kimia"],ips:["Biologi","Kimia"],bahasa:["Biologi","Kimia"]},
+"Transportasi":{ipa:["Matematika"],ips:["Matematika"],bahasa:["Matematika"]},
+"Veteriner":{ipa:["Biologi","Kimia"],ips:["Biologi","Kimia"],bahasa:["Biologi","Kimia"]}
+};
+
+/* INIT DROPDOWN */
+const p1=document.getElementById("p1");
+const p2=document.getElementById("p2");
+Object.keys(prodi).sort().forEach(x=>{
+  p1.innerHTML+=`<option>${x}</option>`;
+  p2.innerHTML+=`<option>${x}</option>`;
+});
+
+/* PROSES */
+function proses(){
+  const jalur=document.getElementById("jalur").value.toLowerCase();
+  let out="";
+  [p1.value,p2.value].forEach(p=>{
+    if(!p)return;
+    const m=prodi[p][jalur]||[];
+    out+=m.length
+      ? `<div class="box"><b>${p}</b><br>Mapel Rekomendasi: ${m.join(", ")}</div>`
+      : `<div class="box"><b>${p}</b><br><span class="warn">Tidak direkomendasikan untuk jalur ini</span></div>`;
+  });
+  document.getElementById("hasil").innerHTML=out;
+}
+</script>
+
+</body>
+</html>
