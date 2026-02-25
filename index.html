@@ -128,14 +128,27 @@ button.print{background:#065f46;color:#fff;border:none}
 </div>
 
 <script>
-/* ========== LOGIN FIX (AMAN) ========== */
-function cekAkses(){
+/* ===== LOGIN (HASH SHA-256) ===== */
+const HASH_BENAR =
+"522d1eb5b5465b74e191da4a6229690fac02f200e648793f7920019260ae6497";
+
+async function sha256(text){
+  const data = new TextEncoder().encode(text.trim());
+  const hash = await crypto.subtle.digest("SHA-256", data);
+  return [...new Uint8Array(hash)]
+    .map(b=>b.toString(16).padStart(2,"0"))
+    .join("");
+}
+
+async function cekAkses(){
   const kode = document.getElementById("kodeAkses").value;
   const loginBox = document.getElementById("loginBox");
   const appBox = document.getElementById("appBox");
   const errorBox = document.getElementById("pesanError");
 
-  if(kode === "neutronmurangan"){
+  const hashInput = await sha256(kode);
+
+  if(hashInput === HASH_BENAR){
     loginBox.style.display = "none";
     appBox.style.display = "block";
     errorBox.style.display = "none";
@@ -143,6 +156,7 @@ function cekAkses(){
     errorBox.style.display = "block";
   }
 }
+
 
 /* ================= DATA PRODI (ISI TIDAK DIUBAH) ================= */
 const prodi={
